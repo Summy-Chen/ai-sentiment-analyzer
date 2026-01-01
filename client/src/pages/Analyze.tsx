@@ -10,8 +10,9 @@ import { trpc } from "@/lib/trpc";
 import { 
   Search, ArrowLeft, TrendingUp, TrendingDown, Minus, 
   ThumbsUp, ThumbsDown, MessageSquare, Download, Bell,
-  BarChart3, User, ExternalLink, Loader2, RefreshCw
+  BarChart3, User, ExternalLink, Loader2, RefreshCw, LineChart
 } from "lucide-react";
+import { SentimentTrendChart, SourceBreakdownChart } from "@/components/SentimentTrendChart";
 import { useState, useEffect } from "react";
 import { Link, useSearch } from "wouter";
 import { Streamdown } from "streamdown";
@@ -427,9 +428,13 @@ export default function Analyze() {
             <div className="grid lg:grid-cols-3 gap-6">
               <div className="lg:col-span-1 space-y-6">
                 <SentimentOverview data={data} />
+                {data.sourceBreakdown && (
+                  <SourceBreakdownChart sourceBreakdown={data.sourceBreakdown} />
+                )}
               </div>
               <div className="lg:col-span-2 space-y-6">
                 <SummarySection summary={data.summary} />
+                <SentimentTrendChart productName={productName} />
                 <CommentsSection data={data} />
               </div>
             </div>

@@ -4,7 +4,8 @@ import {
   InsertUser, users, 
   analysisRecords, InsertAnalysisRecord, AnalysisRecord,
   monitorTasks, InsertMonitorTask, MonitorTask,
-  notifications, InsertNotification, Notification
+  notifications, InsertNotification, Notification,
+  sentimentTrends, InsertSentimentTrend, SentimentTrend
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
@@ -244,4 +245,48 @@ export async function getUnreadNotificationCount(userId: number): Promise<number
     .where(and(eq(notifications.userId, userId), eq(notifications.isRead, false)));
 
   return result.length;
+}
+
+// Sentiment trend functions
+export async function createSentimentTrend(trend: InsertSentimentTrend): Promise<number> {
+  const db = await getDb();
+  if (!db) {
+    throw new Error("Database not available");
+  }
+
+  const result = await db.insert(sentimentTrends).values(trend);
+  return result[0].insertId;
+}
+
+export async function getSentimentTrendsByProduct(
+  productName: string,
+  limit: number = 30
+): Promise<SentimentTrend[]> {
+  const db = await getDb();
+  if (!db) {
+    return [];
+  }
+
+  return await db.select()
+    .from(sentimentTrends)
+    .where(eq(sentimentTrends.productName, productName))
+    .orderBy(desc(sentimentTrends.recordedAt))
+    .limit(limit);
+}
+
+export async function getLatestSentimentTrend(
+  productName: string
+): Promise<SentimentTrend | undefined> {
+  const db = await getDb();
+  if (!db) {
+    return undefined;
+  }
+
+  const result = await db.select()
+    .from(sentimentTrends)
+    .where(eq(sentimentTrends.productName, productName))
+    .orderBy(desc(sentimentTrends.recordedAt))
+    .limit(1);
+
+  return result[0];
 }

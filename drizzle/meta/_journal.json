@@ -15,6 +15,13 @@
       "when": 1767237401719,
       "tag": "0001_green_micromacro",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1767238078364,
+      "tag": "0002_perpetual_bill_hollister",
+      "breakpoints": true
     }
   ]
 }

@@ -6,14 +6,15 @@ import type { TrpcContext } from "./_core/context";
 vi.mock("./services/searchService", () => ({
   searchSocialMedia: vi.fn().mockResolvedValue({
     results: [
-      { text: "Great product, love using it!", source: "Twitter", author: "@user1" },
-      { text: "Has some issues but overall good", source: "Reddit", author: "redditor1" },
-      { text: "Not worth the price", source: "Twitter", author: "@user2" },
-      { text: "Amazing AI capabilities", source: "Reddit", author: "redditor2" },
-      { text: "Average experience, nothing special", source: "Twitter", author: "@user3" }
+      { text: "Great product, love using it!", source: "Twitter", author: "@user1", platform: "twitter" },
+      { text: "Has some issues but overall good", source: "Reddit", author: "redditor1", platform: "reddit" },
+      { text: "Not worth the price", source: "Twitter", author: "@user2", platform: "twitter" },
+      { text: "Amazing AI capabilities", source: "Reddit", author: "redditor2", platform: "reddit" },
+      { text: "Average experience, nothing special", source: "Twitter", author: "@user3", platform: "twitter" }
     ],
     totalFound: 5,
-    sources: ["Twitter", "Reddit"]
+    sources: ["Twitter", "Reddit"],
+    sourceBreakdown: { twitter: 3, reddit: 2, news: 0, web: 0 }
   })
 }));
 
@@ -41,6 +42,8 @@ vi.mock("./services/analysisService", () => ({
 // Mock database functions
 vi.mock("./db", () => ({
   createAnalysisRecord: vi.fn().mockResolvedValue(1),
+  createSentimentTrend: vi.fn().mockResolvedValue(1),
+  getSentimentTrendsByProduct: vi.fn().mockResolvedValue([]),
   getAnalysisRecordsByUserId: vi.fn().mockResolvedValue([
     {
       id: 1,

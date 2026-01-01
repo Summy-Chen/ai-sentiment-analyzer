@@ -102,3 +102,32 @@ export const notifications = mysqlTable("notifications", {
 
 export type Notification = typeof notifications.$inferSelect;
 export type InsertNotification = typeof notifications.$inferInsert;
+
+/**
+ * Sentiment trends table - stores historical sentiment data for trend analysis
+ */
+export const sentimentTrends = mysqlTable("sentiment_trends", {
+  id: int("id").autoincrement().primaryKey(),
+  productName: varchar("productName", { length: 255 }).notNull(),
+  
+  // Sentiment scores at this point in time
+  positiveRatio: int("positiveRatio").notNull(),
+  negativeRatio: int("negativeRatio").notNull(),
+  neutralRatio: int("neutralRatio").notNull(),
+  overallScore: int("overallScore").notNull(), // 0-100, calculated sentiment score
+  
+  // Data source breakdown
+  twitterCount: int("twitterCount").default(0).notNull(),
+  redditCount: int("redditCount").default(0).notNull(),
+  otherCount: int("otherCount").default(0).notNull(),
+  totalCount: int("totalCount").notNull(),
+  
+  // Reference to full analysis if available
+  analysisId: int("analysisId"),
+  
+  // Timestamp for trend tracking
+  recordedAt: timestamp("recordedAt").defaultNow().notNull(),
+});
+
+export type SentimentTrend = typeof sentimentTrends.$inferSelect;
+export type InsertSentimentTrend = typeof sentimentTrends.$inferInsert;

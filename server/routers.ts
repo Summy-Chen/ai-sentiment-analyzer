@@ -15,7 +15,9 @@ import {
   deleteMonitorTask,
   getNotificationsByUserId,
   markNotificationAsRead,
-  getUnreadNotificationCount
+  getUnreadNotificationCount,
+  createSentimentTrend,
+  getSentimentTrendsByProduct
 } from "./db";
 import { searchSocialMedia } from "./services/searchService";
 import { analyzeSentiment, generateReportContent } from "./services/analysisService";
@@ -41,6 +43,9 @@ const analysisRouter = router({
       // Analyze sentiment using LLM
       const analysis = await analyzeSentiment(productName, searchResponse.results);
 
+      // Calculate overall score (0-100)
+      const overallScore = analysis.positiveRatio;
+
       // Save to database if user is authenticated
       let recordId: number | undefined;
       if (ctx.user) {
@@ -60,6 +65,24 @@ const analysisRouter = router({
             totalCommentsAnalyzed: searchResponse.totalFound,
             sources: searchResponse.sources
           });
+
+          // Save sentiment trend data
+          try {
+            await createSentimentTrend({
+              productName,
+              positiveRatio: analysis.positiveRatio,
+              negativeRatio: analysis.negativeRatio,
+              neutralRatio: analysis.neutralRatio,
+              overallScore,
+              twitterCount: searchResponse.sourceBreakdown.twitter,
+              redditCount: searchResponse.sourceBreakdown.reddit,
+              otherCount: searchResponse.sourceBreakdown.news + searchResponse.sourceBreakdown.web,
+              totalCount: searchResponse.totalFound,
+              analysisId: recordId
+            });
+          } catch (trendError) {
+            console.error("Failed to save sentiment trend:", trendError);
+          }
         } catch (error) {
           console.error("Failed to save analysis record:", error);
         }
@@ -70,7 +93,8 @@ const analysisRouter = router({
         productName,
         ...analysis,
         totalCommentsAnalyzed: searchResponse.totalFound,
-        sources: searchResponse.sources
+        sources: searchResponse.sources,
+        sourceBreakdown: searchResponse.sourceBreakdown
       };
     }),
 
@@ -134,6 +158,22 @@ const analysisRouter = router({
         filename,
         mimeType
       };
+    })
+});
+
+// Trend router for sentiment trend data
+const trendRouter = router({
+  // Get sentiment trends for a product
+  getByProduct: publicProcedure
+    .input(z.object({
+      productName: z.string().min(1).max(200),
+      limit: z.number().min(1).max(100).default(30)
+    }))
+    .query(async ({ input }) => {
+      const trends = await getSentimentTrendsByProduct(input.productName, input.limit);
+      
+      // Reverse to show chronological order (oldest first)
+      return trends.reverse();
     })
 });
 
@@ -243,6 +283,7 @@ export const appRouter = router({
     }),
   }),
   analysis: analysisRouter,
+  trend: trendRouter,
   monitor: monitorRouter,
   notification: notificationRouter
 });
