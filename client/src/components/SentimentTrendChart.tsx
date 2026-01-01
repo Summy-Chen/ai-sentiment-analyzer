@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import {
   LineChart,
   Line,
@@ -12,24 +12,49 @@ import {
   AreaChart
 } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { trpc } from "@/lib/trpc";
-import { Loader2 } from "lucide-react";
+import { Loader2, Calendar } from "lucide-react";
 
 interface SentimentTrendChartProps {
   productName: string;
   className?: string;
 }
 
+type TimeRange = "7d" | "30d" | "90d" | "all";
+
+const TIME_RANGE_OPTIONS: { value: TimeRange; label: string; days: number | null }[] = [
+  { value: "7d", label: "近7天", days: 7 },
+  { value: "30d", label: "近30天", days: 30 },
+  { value: "90d", label: "近90天", days: 90 },
+  { value: "all", label: "全部", days: null }
+];
+
 export function SentimentTrendChart({ productName, className }: SentimentTrendChartProps) {
+  const [timeRange, setTimeRange] = useState<TimeRange>("30d");
+  
+  const selectedOption = TIME_RANGE_OPTIONS.find(opt => opt.value === timeRange);
+  const limit = selectedOption?.days || 365;
+
   const { data: trends, isLoading } = trpc.trend.getByProduct.useQuery(
-    { productName, limit: 30 },
+    { productName, limit },
     { enabled: !!productName }
   );
 
   const chartData = useMemo(() => {
     if (!trends || trends.length === 0) return [];
 
-    return trends.map((trend) => ({
+    // Filter by time range
+    const now = new Date();
+    const filteredTrends = trends.filter(trend => {
+      if (timeRange === "all") return true;
+      const trendDate = new Date(trend.recordedAt);
+      const daysDiff = Math.floor((now.getTime() - trendDate.getTime()) / (1000 * 60 * 60 * 24));
+      const daysLimit = TIME_RANGE_OPTIONS.find(opt => opt.value === timeRange)?.days || 365;
+      return daysDiff <= daysLimit;
+    });
+
+    return filteredTrends.map((trend) => ({
       date: new Date(trend.recordedAt).toLocaleDateString("zh-CN", {
         month: "short",
         day: "numeric"
@@ -44,12 +69,12 @@ export function SentimentTrendChart({ productName, className }: SentimentTrendCh
       other: trend.otherCount,
       total: trend.totalCount
     }));
-  }, [trends]);
+  }, [trends, timeRange]);
 
   if (isLoading) {
     return (
       <Card className={className}>
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-lg">情感趋势</CardTitle>
         </CardHeader>
         <CardContent className="flex items-center justify-center h-64">
@@ -62,8 +87,9 @@ export function SentimentTrendChart({ productName, className }: SentimentTrendCh
   if (!chartData || chartData.length === 0) {
     return (
       <Card className={className}>
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-lg">情感趋势</CardTitle>
+          <TimeRangeSelector value={timeRange} onChange={setTimeRange} />
         </CardHeader>
         <CardContent className="flex items-center justify-center h-64 text-muted-foreground">
           <p>暂无趋势数据，多次分析后将显示趋势图表</p>
@@ -74,8 +100,12 @@ export function SentimentTrendChart({ productName, className }: SentimentTrendCh
 
   return (
     <Card className={className}>
-      <CardHeader>
-        <CardTitle className="text-lg">情感趋势变化</CardTitle>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-lg flex items-center gap-2">
+          <Calendar className="w-4 h-4 text-primary" />
+          情感趋势变化
+        </CardTitle>
+        <TimeRangeSelector value={timeRange} onChange={setTimeRange} />
       </CardHeader>
       <CardContent>
         <div className="h-72">
@@ -161,8 +191,39 @@ export function SentimentTrendChart({ productName, className }: SentimentTrendCh
             </AreaChart>
           </ResponsiveContainer>
         </div>
+        <div className="mt-2 text-xs text-muted-foreground text-center">
+          显示 {chartData.length} 条趋势记录
+        </div>
       </CardContent>
     </Card>
+  );
+}
+
+function TimeRangeSelector({ 
+  value, 
+  onChange 
+}: { 
+  value: TimeRange; 
+  onChange: (value: TimeRange) => void;
+}) {
+  return (
+    <div className="flex items-center gap-1 bg-muted/50 rounded-lg p-1">
+      {TIME_RANGE_OPTIONS.map((option) => (
+        <Button
+          key={option.value}
+          variant={value === option.value ? "default" : "ghost"}
+          size="sm"
+          className={`h-7 px-3 text-xs ${
+            value === option.value 
+              ? "gradient-bg text-white shadow-sm" 
+              : "hover:bg-muted"
+          }`}
+          onClick={() => onChange(option.value)}
+        >
+          {option.label}
+        </Button>
+      ))}
+    </div>
   );
 }
 

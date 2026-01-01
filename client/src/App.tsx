@@ -8,12 +8,14 @@ import Home from "./pages/Home";
 import Analyze from "./pages/Analyze";
 import History from "./pages/History";
 import Monitors from "./pages/Monitors";
+import Compare from "./pages/Compare";
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/analyze" component={Analyze} />
+      <Route path="/compare" component={Compare} />
       <Route path="/history" component={History} />
       <Route path="/monitors" component={Monitors} />
       <Route path="/404" component={NotFound} />

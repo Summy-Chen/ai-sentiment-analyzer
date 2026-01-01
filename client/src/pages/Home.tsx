@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { getLoginUrl } from "@/const";
-import { Search, TrendingUp, MessageSquare, BarChart3, History, Bell, LogOut, User } from "lucide-react";
+import { Search, TrendingUp, MessageSquare, BarChart3, History, Bell, LogOut, User, Scale } from "lucide-react";
 import { useState } from "react";
 import { Link } from "wouter";
 
@@ -40,6 +40,10 @@ function Header() {
         <nav className="flex items-center gap-6">
           {isAuthenticated ? (
             <>
+              <Link href="/compare" className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5">
+                <Scale className="w-4 h-4" />
+                对比分析
+              </Link>
               <Link href="/history" className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5">
                 <History className="w-4 h-4" />
                 历史记录

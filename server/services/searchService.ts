@@ -355,24 +355,28 @@ function getTwitterMockResults(productName: string): SearchResult[] {
       text: `Just tried ${productName} and I'm impressed! The AI capabilities are really solid. Great for daily productivity tasks. #AI #Tech`,
       source: "Twitter",
       author: "@tech_reviewer",
+      url: "https://twitter.com/tech_reviewer/status/1234567890",
       platform: "twitter"
     },
     {
       text: `${productName} has been a game-changer for my workflow. The response quality keeps improving with each update.`,
       source: "Twitter",
       author: "@ai_enthusiast",
+      url: "https://twitter.com/ai_enthusiast/status/1234567891",
       platform: "twitter"
     },
     {
       text: `Mixed feelings about ${productName}. Great features but the pricing is getting out of hand. Anyone else feel the same?`,
       source: "Twitter",
       author: "@startup_dev",
+      url: "https://twitter.com/startup_dev/status/1234567892",
       platform: "twitter"
     },
     {
       text: `The latest ${productName} update fixed so many issues. Finally feels polished and ready for serious work.`,
       source: "Twitter",
       author: "@product_hunter",
+      url: "https://twitter.com/product_hunter/status/1234567893",
       platform: "twitter"
     }
   ];
@@ -384,24 +388,28 @@ function getRedditMockResults(productName: string): SearchResult[] {
       text: `Been using ${productName} for 3 months now. Here's my honest review: The good - excellent at creative tasks and brainstorming. The bad - sometimes hallucinates facts. Overall 8/10.`,
       source: "Reddit",
       author: "r/artificial",
+      url: "https://reddit.com/r/artificial/comments/abc123",
       platform: "reddit"
     },
     {
       text: `${productName} vs competitors: Did a side-by-side comparison. ${productName} wins on speed but loses on accuracy for technical queries. Choose based on your use case.`,
       source: "Reddit",
       author: "r/MachineLearning",
+      url: "https://reddit.com/r/MachineLearning/comments/def456",
       platform: "reddit"
     },
     {
       text: `PSA: ${productName}'s free tier is actually quite generous compared to alternatives. Great for students and hobbyists.`,
       source: "Reddit",
       author: "r/ChatGPT",
+      url: "https://reddit.com/r/ChatGPT/comments/ghi789",
       platform: "reddit"
     },
     {
       text: `Disappointed with ${productName}'s customer support. Had billing issues for weeks with no resolution. The product itself is good though.`,
       source: "Reddit",
       author: "r/technology",
+      url: "https://reddit.com/r/technology/comments/jkl012",
       platform: "reddit"
     }
   ];
@@ -413,18 +421,21 @@ function getNewsMockResults(productName: string): SearchResult[] {
       text: `${productName} announces major update with improved reasoning capabilities. Industry analysts predict this could shift the competitive landscape in AI assistants.`,
       source: "TechCrunch",
       author: "Sarah Chen",
+      url: "https://techcrunch.com/2025/01/ai-update",
       platform: "news"
     },
     {
       text: `Review: ${productName} continues to lead in user satisfaction surveys, though privacy concerns remain a topic of discussion among experts.`,
       source: "The Verge",
       author: "Mike Johnson",
+      url: "https://theverge.com/2025/01/ai-review",
       platform: "news"
     },
     {
       text: `Enterprise adoption of ${productName} grows 200% as companies seek AI-powered productivity tools. Security features cited as key differentiator.`,
       source: "Forbes",
       author: "Tech Team",
+      url: "https://forbes.com/2025/01/enterprise-ai",
       platform: "news"
     }
   ];
@@ -435,17 +446,20 @@ function getWebMockResults(productName: string): SearchResult[] {
     {
       text: `Comprehensive ${productName} review: After testing for 6 months, here are the features that stand out and the areas needing improvement.`,
       source: "ProductHunt",
+      url: "https://producthunt.com/products/ai-tool-review",
       platform: "web"
     },
     {
       text: `${productName} tutorial: How to get the most out of this AI tool. Tips from power users and best practices for different use cases.`,
       source: "Medium",
       author: "AI Writer",
+      url: "https://medium.com/@aiwriter/ai-tutorial",
       platform: "web"
     },
     {
       text: `Comparing ${productName} pricing plans: Which tier offers the best value? Analysis of features vs cost for different user types.`,
       source: "G2 Reviews",
+      url: "https://g2.com/products/ai-tool/reviews",
       platform: "web"
     }
   ];
