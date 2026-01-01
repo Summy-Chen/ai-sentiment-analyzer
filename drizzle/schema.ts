@@ -1,17 +1,10 @@
-import { int, mysqlEnum, mysqlTable, text, timestamp, varchar } from "drizzle-orm/mysql-core";
+import { int, mysqlEnum, mysqlTable, text, timestamp, varchar, json, boolean } from "drizzle-orm/mysql-core";
 
 /**
  * Core user table backing auth flow.
- * Extend this file with additional tables as your product grows.
- * Columns use camelCase to match both database fields and generated types.
  */
 export const users = mysqlTable("users", {
-  /**
-   * Surrogate primary key. Auto-incremented numeric value managed by the database.
-   * Use this for relations between tables.
-   */
   id: int("id").autoincrement().primaryKey(),
-  /** Manus OAuth identifier (openId) returned from the OAuth callback. Unique per user. */
   openId: varchar("openId", { length: 64 }).notNull().unique(),
   name: text("name"),
   email: varchar("email", { length: 320 }),
@@ -25,4 +18,87 @@ export const users = mysqlTable("users", {
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
 
-// TODO: Add your tables here
+/**
+ * Analysis records table - stores sentiment analysis results
+ */
+export const analysisRecords = mysqlTable("analysis_records", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  productName: varchar("productName", { length: 255 }).notNull(),
+  
+  // Overall sentiment scores
+  overallSentiment: mysqlEnum("overallSentiment", ["positive", "negative", "neutral", "mixed"]).notNull(),
+  positiveRatio: int("positiveRatio").notNull(), // 0-100 percentage
+  negativeRatio: int("negativeRatio").notNull(), // 0-100 percentage
+  neutralRatio: int("neutralRatio").notNull(), // 0-100 percentage
+  
+  // Analysis content
+  summary: text("summary").notNull(), // LLM generated summary
+  keyThemes: json("keyThemes").$type<string[]>().notNull(), // Key themes extracted
+  
+  // Representative comments
+  positiveComments: json("positiveComments").$type<{text: string; source: string; author?: string}[]>().notNull(),
+  negativeComments: json("negativeComments").$type<{text: string; source: string; author?: string}[]>().notNull(),
+  neutralComments: json("neutralComments").$type<{text: string; source: string; author?: string}[]>().notNull(),
+  
+  // Raw data reference
+  totalCommentsAnalyzed: int("totalCommentsAnalyzed").notNull(),
+  sources: json("sources").$type<string[]>().notNull(), // e.g., ["Twitter", "Reddit"]
+  
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type AnalysisRecord = typeof analysisRecords.$inferSelect;
+export type InsertAnalysisRecord = typeof analysisRecords.$inferInsert;
+
+/**
+ * Monitor tasks table - stores scheduled monitoring configurations
+ */
+export const monitorTasks = mysqlTable("monitor_tasks", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  productName: varchar("productName", { length: 255 }).notNull(),
+  
+  // Monitoring settings
+  isActive: boolean("isActive").default(true).notNull(),
+  frequency: mysqlEnum("frequency", ["daily", "weekly", "monthly"]).default("daily").notNull(),
+  
+  // Notification settings
+  notifyOnSignificantChange: boolean("notifyOnSignificantChange").default(true).notNull(),
+  significantChangeThreshold: int("significantChangeThreshold").default(20).notNull(), // percentage change
+  notifyEmail: boolean("notifyEmail").default(false).notNull(),
+  notifyInApp: boolean("notifyInApp").default(true).notNull(),
+  
+  // Last analysis reference
+  lastAnalysisId: int("lastAnalysisId"),
+  lastAnalyzedAt: timestamp("lastAnalyzedAt"),
+  lastSentimentScore: int("lastSentimentScore"), // 0-100, for tracking changes
+  
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type MonitorTask = typeof monitorTasks.$inferSelect;
+export type InsertMonitorTask = typeof monitorTasks.$inferInsert;
+
+/**
+ * Notifications table - stores user notifications
+ */
+export const notifications = mysqlTable("notifications", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  
+  type: mysqlEnum("type", ["sentiment_change", "analysis_complete", "monitor_alert"]).notNull(),
+  title: varchar("title", { length: 255 }).notNull(),
+  message: text("message").notNull(),
+  
+  // Related records
+  analysisId: int("analysisId"),
+  monitorTaskId: int("monitorTaskId"),
+  
+  isRead: boolean("isRead").default(false).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type Notification = typeof notifications.$inferSelect;
+export type InsertNotification = typeof notifications.$inferInsert;
